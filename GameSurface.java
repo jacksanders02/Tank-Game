@@ -13,6 +13,8 @@ class GameSurface extends JPanel {
     
     private BufferedImage bgImage;
     
+    private Player player;
+    
     public GameSurface() {
         // Load asset for background image
         loadImage();
@@ -20,6 +22,8 @@ class GameSurface extends JPanel {
         // Sets JPanel size and colour
         setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
         setBackground(new Color(255, 0, 0));
+        
+        player = new Player(GAME_WIDTH / 2, GAME_HEIGHT / 2);
     }
     
     @Override
@@ -27,6 +31,8 @@ class GameSurface extends JPanel {
         super.paintComponent(g); // Call paintComponent method of JPanel
 
         drawBackground(g); // Draw game background
+        
+        player.draw(g, this);
         
         // Smooths animations
         Toolkit.getDefaultToolkit().sync();
