@@ -160,12 +160,25 @@ class Player {
         double tempAngle = Math.toRadians(90 - theta) - diagAngle;
         bBoxHalfWidth = (int) ((diagLength / 2) * Math.cos(tempAngle));
         bBoxHalfHeight = (int) ((diagLength / 2) * Math.cos(Math.toRadians(theta) - diagAngle));
+        
+        if (realCoords[0] - bBoxHalfWidth < 0) {
+            realCoords[0] = 0 + bBoxHalfWidth;
+            pos.x = 0 + bBoxHalfWidth;
+        } else if (realCoords[0] + bBoxHalfWidth > GameSurface.GAME_WIDTH) {
+            realCoords[0] = GameSurface.GAME_WIDTH - bBoxHalfWidth;
+            pos.x = GameSurface.GAME_WIDTH - bBoxHalfWidth;
+        }
+        
+        if (realCoords[1] - bBoxHalfHeight < 0) {
+            realCoords[1] = 0 + bBoxHalfHeight;
+            pos.y = 0 + bBoxHalfHeight;
+        } else if (realCoords[1] + bBoxHalfHeight > GameSurface.GAME_HEIGHT) {
+            realCoords[1] = GameSurface.GAME_HEIGHT - bBoxHalfHeight;
+            pos.y = GameSurface.GAME_HEIGHT - bBoxHalfHeight;
+        }
     }
     
     public void draw(Graphics g, ImageObserver observer) {
-        g.setColor(Color.RED);
-        g.fillRect(pos.x - bBoxHalfWidth, pos.y - bBoxHalfHeight, bBoxHalfWidth * 2, bBoxHalfHeight * 2);
-        
         // Create AffineTransform object that will rotate the image.
         AffineTransform at = new AffineTransform();
         at.translate(pos.x, pos.y); // Translate to desired position
