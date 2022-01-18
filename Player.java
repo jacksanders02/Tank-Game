@@ -9,6 +9,8 @@ import java.awt.MouseInfo;
 
 import java.awt.event.KeyEvent;
 
+import java.awt.Color;
+
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -28,11 +30,24 @@ class Player {
     private double angle;
     private double turretAngle;
     
+    // Used for bounding box calculations
+    private double diagLength;
+    private double diagAngle; // Angle from diagonal to long side of sprite
+    private int bBoxHalfWidth;
+    private int bBoxHalfHeight;
+    
     private boolean[] keysPressed;
     
     public Player(int x, int y) {
         // Load tank base and turret
         loadImages();
+        
+        // Pythagoras to calculate length of diagonal
+        diagLength = Math.sqrt(Math.pow(tankBase.getHeight(), 2) + 
+                                Math.pow(tankBase.getWidth(), 2));
+
+        // tan = opp/adj so angle = atan(opp/adj)
+        diagAngle = Math.atan((double) tankBase.getWidth()/tankBase.getHeight());
         
         /* Store coordinates in relevant instance variables. realCoords is used 
          * to store the true non-integer values of the coordinates, so that the
@@ -42,6 +57,9 @@ class Player {
         aim = pos;
         realCoords = new double[]{x, y};
         angle = 0;
+        
+        bBoxHalfWidth = 0;
+        bBoxHalfHeight = 0;
         
         /*
          * Stores data on which direction is being pressed, to remove the delay
@@ -99,6 +117,12 @@ class Player {
         if (keysPressed[2]) angle -= TURN_SPEED;
         if (keysPressed[3]) angle += TURN_SPEED;
         
+        if (angle < -179) {
+            angle += 360;
+        } else if (angle > 180) {
+            angle -= 360;
+        }
+        
         //Calculate necessary x and y changes for given rotation
         double radians = Math.toRadians(angle);
         double xChange = SPEED * Math.sin(radians);
@@ -126,9 +150,22 @@ class Player {
         
         // Update turret angle to point towards cursor
         turretAngle = Math.atan2((aim.x - pos.x), -(aim.y - pos.y));
+        
+        // Calculate bounding box
+        double theta = Math.abs(angle);
+        if (theta > 90) {
+            theta = 90 - (theta - 90);
+        }
+
+        double tempAngle = Math.toRadians(90 - theta) - diagAngle;
+        bBoxHalfWidth = (int) ((diagLength / 2) * Math.cos(tempAngle));
+        bBoxHalfHeight = (int) ((diagLength / 2) * Math.cos(Math.toRadians(theta) - diagAngle));
     }
     
     public void draw(Graphics g, ImageObserver observer) {
+        g.setColor(Color.RED);
+        g.fillRect(pos.x - bBoxHalfWidth, pos.y - bBoxHalfHeight, bBoxHalfWidth * 2, bBoxHalfHeight * 2);
+        
         // Create AffineTransform object that will rotate the image.
         AffineTransform at = new AffineTransform();
         at.translate(pos.x, pos.y); // Translate to desired position
@@ -143,7 +180,7 @@ class Player {
         at.translate(pos.x, pos.y); // Translate to desired position
         at.rotate(turretAngle); // Rotate (No need to convert to radians as turretAngle is already in radians)
         // Translate up and left by half of width and height, to centre the image
-        at.translate(-tankBase.getWidth()/2, -tankBase.getHeight()/2);
+        at.translate(-tankTurret.getWidth()/2, -tankTurret.getHeight()/2);
         g2d.drawImage(tankTurret, at, null);
     }
 }
