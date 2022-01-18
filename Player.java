@@ -5,6 +5,7 @@ import java.awt.image.ImageObserver;
 import javax.swing.JOptionPane;
 
 import java.awt.Point;
+import java.awt.MouseInfo;
 
 import java.awt.event.KeyEvent;
 
@@ -20,10 +21,13 @@ class Player {
     
     private BufferedImage tankBase;
     private BufferedImage tankTurret;
+    private BufferedImage crosshair;
     
     private Point pos;
     private double[] realCoords;
     private double angle;
+    private Point aim;
+    
     private boolean[] keysPressed;
     
     public Player(int x, int y) {
@@ -35,6 +39,7 @@ class Player {
          * player can move at a shallow angle and not be forced into a straight line
          */
         pos = new Point(x, y);
+        aim = new Point(x, y);
         realCoords = new double[]{x, y};
         angle = 0;
         
@@ -49,6 +54,7 @@ class Player {
         try {
             tankBase = ImageIO.read(new File("assets/images/tankBase.png"));
             tankTurret = ImageIO.read(new File("assets/images/tankTurret.png"));
+            crosshair = ImageIO.read(new File("assets/images/crosshair.png"));
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Error loading player sprites: " 
                                                   + e.getMessage());
@@ -114,6 +120,11 @@ class Player {
             pos.x = (int) realCoords[0];
             pos.y = (int) realCoords[1];
         }
+        
+        // Update aim
+        Point mouseCoords = MouseInfo.getPointerInfo().getLocation();
+        aim.x = mouseCoords.x - Tanks.gameFrame.getLocation().x;
+        aim.y = mouseCoords.y - Tanks.gameFrame.getLocation().y;
     }
     
     public void draw(Graphics g, ImageObserver observer) {
@@ -127,5 +138,13 @@ class Player {
         Graphics2D g2d = (Graphics2D) g;
         g2d.drawImage(tankBase, at, null);
         g2d.drawImage(tankTurret, at, null);
+        
+        at.setToIdentity();
+        at.translate(aim.x, aim.y); // Translate to desired position
+        at.rotate(Math.toRadians(45)); // Rotate 45 degrees
+        // Translate up and left by half of width and height, to centre the image
+        at.translate(-crosshair.getWidth()/2, -crosshair.getHeight()/2);
+        
+        g2d.drawImage(crosshair, at, null);
     }
 }
