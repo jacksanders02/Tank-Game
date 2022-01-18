@@ -14,10 +14,13 @@ import javax.imageio.ImageIO;
 import java.awt.geom.AffineTransform;
 
 class Player {
-    final int SPEED = 5;
+    // Constants and instance variables
+    final double SPEED = 200 * ((double)GameSurface.FRAME_TIME / 1000); // Px/frame
     final double TURN_SPEED = 72 * ((double)GameSurface.FRAME_TIME / 1000); // Deg/frame
+    
     private BufferedImage tankBase;
     private Point pos;
+    private double[] realCoords;
     private double angle;
     private boolean[] keysPressed;
     
@@ -25,7 +28,12 @@ class Player {
         // Load tank base and turret
         loadImages();
         
+        /* Store coordinates in relevant instance variables. realCoords is used 
+         * to store the true non-integer values of the coordinates, so that the
+         * player can move at a shallow angle and not be forced into a straight line
+         */
         pos = new Point(x, y);
+        realCoords = new double[]{x, y};
         angle = 0;
         
         /*
@@ -85,11 +93,24 @@ class Player {
         
         //Calculate necessary x and y changes for given rotation
         double radians = Math.toRadians(angle);
-        int xChange = (int) (SPEED * Math.sin(radians));
-        int yChange = (int) (SPEED * Math.cos(radians));
+        double xChange = SPEED * Math.sin(radians);
+        double yChange = SPEED * Math.cos(radians);
         
-        if (keysPressed[0]) pos.translate(xChange, -yChange);
-        if (keysPressed[1]) pos.translate(-xChange, yChange);
+        /* If necessary, update realCoords by the exact decimal value, and then 
+         * cast them to ints to be used by pos.
+         */
+        if (keysPressed[0]) {
+            realCoords[0] += xChange;
+            realCoords[1] -= yChange;
+            pos.x = (int) realCoords[0];
+            pos.y = (int) realCoords[1];
+        }
+        if (keysPressed[1]) {
+            realCoords[0] -= xChange;
+            realCoords[1] += yChange;
+            pos.x = (int) realCoords[0];
+            pos.y = (int) realCoords[1];
+        }
     }
     
     public void draw(Graphics g, ImageObserver observer) {
