@@ -23,8 +23,10 @@ class Player {
     private BufferedImage tankTurret;
     
     private Point pos;
+    private Point aim;
     private double[] realCoords;
     private double angle;
+    private double turretAngle;
     
     private boolean[] keysPressed;
     
@@ -37,6 +39,7 @@ class Player {
          * player can move at a shallow angle and not be forced into a straight line
          */
         pos = new Point(x, y);
+        aim = pos;
         realCoords = new double[]{x, y};
         angle = 0;
         
@@ -116,6 +119,13 @@ class Player {
             pos.x = (int) realCoords[0];
             pos.y = (int) realCoords[1];
         }
+        
+        // Update aim to match mouse coordinates.
+        aim = MouseInfo.getPointerInfo().getLocation();
+        aim.translate(-Tanks.gameFrame.getLocationOnScreen().x, -Tanks.gameFrame.getLocationOnScreen().y);
+        
+        // Update turret angle to point towards cursor
+        turretAngle = Math.atan2((aim.x - pos.x), -(aim.y - pos.y));
     }
     
     public void draw(Graphics g, ImageObserver observer) {
@@ -128,6 +138,12 @@ class Player {
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.drawImage(tankBase, at, null);
+        
+        at.setToIdentity();
+        at.translate(pos.x, pos.y); // Translate to desired position
+        at.rotate(turretAngle); // Rotate (No need to convert to radians as turretAngle is already in radians)
+        // Translate up and left by half of width and height, to centre the image
+        at.translate(-tankBase.getWidth()/2, -tankBase.getHeight()/2);
         g2d.drawImage(tankTurret, at, null);
     }
 }

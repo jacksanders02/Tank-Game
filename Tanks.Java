@@ -8,9 +8,10 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 class Tanks {
+    public static JFrame gameFrame;
     
     public static void createWindow() {
-        JFrame gameFrame = new JFrame("Tanks!");
+        gameFrame = new JFrame("Tanks!");
         
         GameSurface gameSurface = new GameSurface();
         
