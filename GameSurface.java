@@ -8,12 +8,18 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-class GameSurface extends JPanel implements ActionListener {
+/*
+ * This class extends JPanel as it has similar function. Also implements the 
+ * ActionListener and KeyListener interfaces as they are both required for the 
+ * running of the game (Action for game loop, Key to handle keypresses).
+ */
+ 
+class GameSurface extends JPanel implements ActionListener, KeyListener {
     // Constants and instance variables
     public static final int GAME_WIDTH = 1600;
     public static final int GAME_HEIGHT = 900;
     
-    private static final int FRAME_TIME = 25; // Time between frames (in ms)
+    public static final int FRAME_TIME = 25; // Time between frames (in ms)
     
     private BufferedImage bgImage;
     
@@ -38,7 +44,8 @@ class GameSurface extends JPanel implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        
+        player.update();
+        repaint(); // Method of JPanel - calls paintComponent again
     }
     
     @Override
@@ -52,6 +59,24 @@ class GameSurface extends JPanel implements ActionListener {
         // Smooths animations
         Toolkit.getDefaultToolkit().sync();
     }
+    
+    /*
+     * All abstract methods of KeyListener are required to be overridden,
+     * whether used or not.
+     */
+    @Override
+    public void keyTyped(KeyEvent e) {}
+    
+    @Override
+    public void keyPressed(KeyEvent e) {
+        player.handleKeypress(e);
+    }
+    
+    @Override
+    public void keyReleased(KeyEvent e) {
+        player.handleKeyRelease(e);
+    }
+    
     
     private void drawBackground(Graphics g) {
         // Draw tileable background image 32 times in an 8x4 rectangle 

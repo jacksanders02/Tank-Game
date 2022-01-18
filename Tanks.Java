@@ -6,9 +6,10 @@ class Tanks {
     public static void createWindow() {
         JFrame gameFrame = new JFrame("Tanks!");
         
-        GameSurface board = new GameSurface();
+        GameSurface gameSurface = new GameSurface();
         
-        gameFrame.add(board);
+        gameFrame.add(gameSurface);
+        gameFrame.addKeyListener(gameSurface);
         
         gameFrame.pack();
         gameFrame.setResizable(false);
