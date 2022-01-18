@@ -5,6 +5,8 @@ import javax.swing.JOptionPane;
 
 import java.awt.Point;
 
+import java.awt.event.KeyEvent;
+
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
