@@ -19,6 +19,8 @@ class Player {
     final double TURN_SPEED = 72 * ((double)GameSurface.FRAME_TIME / 1000); // Deg/frame
     
     private BufferedImage tankBase;
+    private BufferedImage tankTurret;
+    
     private Point pos;
     private double[] realCoords;
     private double angle;
@@ -46,6 +48,7 @@ class Player {
     private void loadImages() {
         try {
             tankBase = ImageIO.read(new File("assets/images/tankBase.png"));
+            tankTurret = ImageIO.read(new File("assets/images/tankTurret.png"));
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Error loading player sprites: " 
                                                   + e.getMessage());
@@ -123,5 +126,6 @@ class Player {
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.drawImage(tankBase, at, null);
+        g2d.drawImage(tankTurret, at, null);
     }
 }
