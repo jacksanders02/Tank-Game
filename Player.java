@@ -19,7 +19,7 @@ import java.awt.geom.AffineTransform;
 class Player {
     // Constants and instance variables
     public final double SPEED = 200 * ((double)GameSurface.FRAME_TIME / 1000); // Px/frame
-    public final double TURN_SPEED = 144 * ((double)GameSurface.FRAME_TIME / 1000); // Deg/frame
+    public final double TURN_SPEED = Math.toRadians(144) * ((double)GameSurface.FRAME_TIME / 1000); // rad/frame
     
     private BufferedImage tankBase;
     private BufferedImage tankTurret;
@@ -138,15 +138,15 @@ class Player {
     private void calculateBoundingRect() {
         // Calculate bounding box
         double theta = Math.abs(angle);
-        if (theta > 90) {
-            // Keep theta between below 90 otherwise triangle angle calcs will break
-            theta = 90 - (theta - 90);
+        if (theta > Math.PI / 2) {
+            // Keep theta between below pi/2 otherwise triangle angle calcs will break
+            theta = Math.PI - theta;
         }
            
         // Trigonometry magic 
-        double tempAngle = Math.toRadians(90 - theta) - diagAngle;
+        double tempAngle = Math.PI / 2 - theta - diagAngle;
         int bBoxHalfWidth = (int) ((diagLength / 2) * Math.cos(tempAngle));
-        int bBoxHalfHeight = (int) ((diagLength / 2) * Math.cos(Math.toRadians(theta) - diagAngle));
+        int bBoxHalfHeight = (int) ((diagLength / 2) * Math.cos(theta - diagAngle));
         
         bBox.width = bBoxHalfWidth;
         bBox.height = bBoxHalfHeight;
@@ -157,16 +157,15 @@ class Player {
         if (keysPressed[2]) angle -= TURN_SPEED;
         if (keysPressed[3]) angle += TURN_SPEED;
         
-        if (angle < -179) {
-            angle += 360;
-        } else if (angle > 180) {
-            angle -= 360;
+        if (angle < -Math.PI) {
+            angle += Math.PI * 2;
+        } else if (angle > Math.PI) {
+            angle -= Math.PI * 2;
         }
         
         //Calculate necessary x and y changes for given rotation
-        double radians = Math.toRadians(angle);
-        double xChange = SPEED * Math.sin(radians);
-        double yChange = SPEED * Math.cos(radians);
+        double xChange = SPEED * Math.sin(angle);
+        double yChange = SPEED * Math.cos(angle);
         
         /* If necessary, update realCoords by the exact decimal value, and then 
          * cast them to ints to be used by pos.
@@ -215,7 +214,7 @@ class Player {
         // Create AffineTransform object that will rotate the image.
         AffineTransform at = new AffineTransform();
         at.translate(pos.x, pos.y); // Translate to desired position
-        at.rotate(Math.toRadians(angle)); // Rotate
+        at.rotate(angle); // Rotate
         // Translate up and left by half of width and height, to centre the image
         at.translate(-tankBase.getWidth()/2, -tankBase.getHeight()/2);
 
