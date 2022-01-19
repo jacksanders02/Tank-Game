@@ -42,7 +42,7 @@ public class Shell extends Sprite {
         currentBounce ++;
     }
     
-    private void destroy() {
+    public void destroy() {
         Tanks.gameSurface.deleteShell(arrayListIndex);
     }
     

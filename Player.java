@@ -6,6 +6,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.MouseInfo;
 
+import javax.swing.JOptionPane;
+
 class Player extends Tank {
     
     private boolean[] keysPressed;
@@ -35,6 +37,14 @@ class Player extends Tank {
         if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_KP_RIGHT) {
             keysPressed[3] = true;
         }
+        
+        if (keysPressed[1]) {
+            animationStep = -1;
+        } else {
+            for (boolean k : keysPressed) {
+                if (k) animationStep = 1;
+            }
+        }
     }
     
     public void handleKeyRelease(KeyEvent e) {
@@ -52,6 +62,16 @@ class Player extends Tank {
         if (key == KeyEvent.VK_D || key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_KP_RIGHT) {
             keysPressed[3] = false;
         }
+        
+        // If any key is still pressed, set animationStep back to true
+        animationStep = 0;
+        if (keysPressed[1]) {
+            animationStep = -1;
+        } else {
+            for (boolean k : keysPressed) {
+                if (k) animationStep = 1;
+            }
+        }
     }
     
     public void handleMouseClick(MouseEvent e) {
@@ -65,6 +85,23 @@ class Player extends Tank {
         // RMB to lay a mine
         if (button == MouseEvent.BUTTON3) {
             System.out.println("mine");
+        }
+    }
+    
+    @Override
+    public void kill() {
+        super.kill();
+        Tanks.gameSurface.clearShells();
+        
+        int playAgain = JOptionPane.showOptionDialog(Tanks.gameFrame, 
+                                                     "You died!", "lol", 
+                                                     JOptionPane.OK_CANCEL_OPTION, 
+                                                     JOptionPane.INFORMATION_MESSAGE, 
+                                                     null, null, null);
+        if (playAgain == JOptionPane.OK_OPTION) {
+            Tanks.gameSurface.resetPlayer();
+        } else {
+            System.exit(0);
         }
     }
     

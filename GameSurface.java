@@ -71,7 +71,8 @@ class GameSurface extends JPanel implements ActionListener, KeyListener, MouseLi
             for (int j=0; j<tankList.size(); j++) {
                 currentShellHitbox.intersect(new Area(tankList.get(j).getHitbox()));
                 if (!currentShellHitbox.isEmpty()) {
-                    System.out.println("ouch");
+                    shellList.get(i).destroy();
+                    tankList.get(j).kill();
                 }
             }
         }
@@ -147,6 +148,10 @@ class GameSurface extends JPanel implements ActionListener, KeyListener, MouseLi
         shellList.remove(index);
     }
     
+    public void clearShells() {
+        shellList.clear();
+    }
+    
     public void deleteTank(int index) {
         // Subtract 1 from the index of all subsequent shells
         if (index != tankList.size() - 1) {
@@ -155,6 +160,14 @@ class GameSurface extends JPanel implements ActionListener, KeyListener, MouseLi
             }
         }
         tankList.remove(index);
+    }
+    
+    public void resetPlayer() {
+        // Resets player tank after death
+        player = new Player(GAME_WIDTH / 2, GAME_HEIGHT / 2);
+        player.setArrayListIndex(0);
+        
+        tankList.add(0, player);
     }
     
     private void drawBackground(Graphics g) {
