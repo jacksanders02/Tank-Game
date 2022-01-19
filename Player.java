@@ -5,11 +5,11 @@ import java.awt.image.ImageObserver;
 import javax.swing.JOptionPane;
 
 import java.awt.Point;
-import java.awt.MouseInfo;
+import java.awt.Dimension;
 
 import java.awt.event.KeyEvent;
-
-import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.MouseInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +18,8 @@ import java.awt.geom.AffineTransform;
 
 class Player {
     // Constants and instance variables
-    final double SPEED = 200 * ((double)GameSurface.FRAME_TIME / 1000); // Px/frame
-    final double TURN_SPEED = 72 * ((double)GameSurface.FRAME_TIME / 1000); // Deg/frame
+    public final double SPEED = 200 * ((double)GameSurface.FRAME_TIME / 1000); // Px/frame
+    public final double TURN_SPEED = 72 * ((double)GameSurface.FRAME_TIME / 1000); // Deg/frame
     
     private BufferedImage tankBase;
     private BufferedImage tankTurret;
@@ -33,8 +33,7 @@ class Player {
     // Used for bounding box calculations
     private double diagLength;
     private double diagAngle; // Angle from diagonal to long side of sprite
-    private int bBoxHalfWidth;
-    private int bBoxHalfHeight;
+    private Dimension bBox;
     
     private boolean[] keysPressed;
     
@@ -58,8 +57,8 @@ class Player {
         realCoords = new double[]{x, y};
         angle = 0;
         
-        bBoxHalfWidth = 0;
-        bBoxHalfHeight = 0;
+        bBox = new Dimension(0, 0);
+        calculateBoundingRect();
         
         /*
          * Stores data on which direction is being pressed, to remove the delay
@@ -112,6 +111,47 @@ class Player {
         }
     }
     
+    public void handleMouseClick(MouseEvent e) {
+        int button = e.getButton();
+        
+        // LMB to shoot
+        if (button == MouseEvent.BUTTON1) {
+            fireShell();
+        }
+        
+        // RMB to lay a mine
+        if (button == MouseEvent.BUTTON3) {
+            System.out.println("mine");
+        }
+    }
+    
+    private void fireShell() {
+        // Calculate shell position to be at the end of the turret
+        double turretLength = tankTurret.getHeight() / 2;
+        int shellX = (int) (pos.x + Math.sin(turretAngle) * turretLength);
+        int shellY = (int) (pos.y - Math.cos(turretAngle) * turretLength);
+        
+        // Adds a shell to GameSurface's arraylist
+        Tanks.gameSurface.addShell(new Shell(SPEED * 2, shellX, shellY, turretAngle, 0));
+    }
+    
+    private void calculateBoundingRect() {
+        // Calculate bounding box
+        double theta = Math.abs(angle);
+        if (theta > 90) {
+            // Keep theta between below 90 otherwise triangle angle calcs will break
+            theta = 90 - (theta - 90);
+        }
+           
+        // Trigonometry magic 
+        double tempAngle = Math.toRadians(90 - theta) - diagAngle;
+        int bBoxHalfWidth = (int) ((diagLength / 2) * Math.cos(tempAngle));
+        int bBoxHalfHeight = (int) ((diagLength / 2) * Math.cos(Math.toRadians(theta) - diagAngle));
+        
+        bBox.width = bBoxHalfWidth;
+        bBox.height = bBoxHalfHeight;
+    }
+    
     public void update() {
         // Rotate tank
         if (keysPressed[2]) angle -= TURN_SPEED;
@@ -151,30 +191,23 @@ class Player {
         // Update turret angle to point towards cursor
         turretAngle = Math.atan2((aim.x - pos.x), -(aim.y - pos.y));
         
-        // Calculate bounding box
-        double theta = Math.abs(angle);
-        if (theta > 90) {
-            theta = 90 - (theta - 90);
-        }
-
-        double tempAngle = Math.toRadians(90 - theta) - diagAngle;
-        bBoxHalfWidth = (int) ((diagLength / 2) * Math.cos(tempAngle));
-        bBoxHalfHeight = (int) ((diagLength / 2) * Math.cos(Math.toRadians(theta) - diagAngle));
+        calculateBoundingRect();
         
-        if (realCoords[0] - bBoxHalfWidth < 0) {
-            realCoords[0] = 0 + bBoxHalfWidth;
-            pos.x = 0 + bBoxHalfWidth;
-        } else if (realCoords[0] + bBoxHalfWidth > GameSurface.GAME_WIDTH) {
-            realCoords[0] = GameSurface.GAME_WIDTH - bBoxHalfWidth;
-            pos.x = GameSurface.GAME_WIDTH - bBoxHalfWidth;
+        // Check in both x and y dimensions to see if the bounding box intersects with the edge of the frame
+        if (realCoords[0] - bBox.width < 0) {
+            realCoords[0] = 0 + bBox.width;
+            pos.x = 0 + bBox.width;
+        } else if (realCoords[0] + bBox.width > GameSurface.GAME_WIDTH) {
+            realCoords[0] = GameSurface.GAME_WIDTH - bBox.width;
+            pos.x = GameSurface.GAME_WIDTH - bBox.width;
         }
         
-        if (realCoords[1] - bBoxHalfHeight < 0) {
-            realCoords[1] = 0 + bBoxHalfHeight;
-            pos.y = 0 + bBoxHalfHeight;
-        } else if (realCoords[1] + bBoxHalfHeight > GameSurface.GAME_HEIGHT) {
-            realCoords[1] = GameSurface.GAME_HEIGHT - bBoxHalfHeight;
-            pos.y = GameSurface.GAME_HEIGHT - bBoxHalfHeight;
+        if (realCoords[1] - bBox.height < 0) {
+            realCoords[1] = 0 + bBox.height;
+            pos.y = 0 + bBox.height;
+        } else if (realCoords[1] + bBox.height > GameSurface.GAME_HEIGHT) {
+            realCoords[1] = GameSurface.GAME_HEIGHT - bBox.height;
+            pos.y = GameSurface.GAME_HEIGHT - bBox.height;
         }
     }
     

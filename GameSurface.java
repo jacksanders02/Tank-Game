@@ -8,13 +8,15 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
+import java.util.ArrayList;
+
 /*
  * This class extends JPanel as it has similar function. Also implements the 
  * ActionListener and KeyListener interfaces as they are both required for the 
  * running of the game (Action for game loop, Key to handle keypresses).
  */
  
-class GameSurface extends JPanel implements ActionListener, KeyListener {
+class GameSurface extends JPanel implements ActionListener, KeyListener, MouseListener{
     // Constants and instance variables
     public static final int GAME_WIDTH = 1600;
     public static final int GAME_HEIGHT = 900;
@@ -27,6 +29,8 @@ class GameSurface extends JPanel implements ActionListener, KeyListener {
     
     private Timer gameTimer;
     
+    private ArrayList<Shell> shellList;
+    
     public GameSurface() {
         // Load asset for background image
         loadImage();
@@ -36,6 +40,7 @@ class GameSurface extends JPanel implements ActionListener, KeyListener {
         setBackground(new Color(255, 0, 0));
         
         player = new Player(GAME_WIDTH / 2, GAME_HEIGHT / 2);
+        shellList = new ArrayList<Shell>();
         
         // Set up and start game loop (timer calls actionPerformed every FRAME_TIME ms)
         gameTimer = new Timer(FRAME_TIME, this);
@@ -45,6 +50,11 @@ class GameSurface extends JPanel implements ActionListener, KeyListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         player.update();
+        
+        for (int i=0; i<shellList.size(); i++) {
+            shellList.get(i).update();
+        }
+        
         repaint(); // Method of JPanel - calls paintComponent again
     }
     
@@ -56,13 +66,17 @@ class GameSurface extends JPanel implements ActionListener, KeyListener {
         
         player.draw(g, this); // Draw player sprite
         
+        for (int i=0; i<shellList.size(); i++) {
+            shellList.get(i).draw(g, this);
+        }
+        
         // Smooths animations
         Toolkit.getDefaultToolkit().sync();
     }
-    
+
     /*
-     * All abstract methods of KeyListener are required to be overridden,
-     * whether used or not.
+     * All abstract methods of KeyListener and MouseListener are required to be 
+     * overridden, whether used or not.
      */
     @Override
     public void keyTyped(KeyEvent e) {}
@@ -77,6 +91,38 @@ class GameSurface extends JPanel implements ActionListener, KeyListener {
         player.handleKeyRelease(e);
     }
     
+    @Override
+    public void mouseClicked(MouseEvent e) {}
+    
+    @Override
+    public void mouseEntered(MouseEvent e) {}
+    
+    @Override
+    public void mouseExited(MouseEvent e) {}
+    
+    @Override
+    public void mousePressed(MouseEvent e) {}
+    
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        // Using mouseReleased instead of mouseClicked as the latter doesn't work if the mouse is moving when clicked.
+        player.handleMouseClick(e);
+    }
+    
+    public void addShell(Shell s) {
+        shellList.add(s);
+        shellList.get(shellList.size() - 1).setArrayListIndex(shellList.size() - 1);
+    }
+    
+    public void deleteShell(int index) {
+        // Subtract 1 from the index of all subsequent shells
+        if (index != shellList.size() - 1) {
+            for (int i=index+1; i<shellList.size(); i++) {
+                shellList.get(i).setArrayListIndex(i - 1);
+            }
+        }
+        shellList.remove(index);
+    }
     
     private void drawBackground(Graphics g) {
         // Draw tileable background image 32 times in an 8x4 rectangle 

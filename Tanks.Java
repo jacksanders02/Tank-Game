@@ -9,14 +9,16 @@ import javax.imageio.ImageIO;
 
 class Tanks {
     public static JFrame gameFrame;
+    public static GameSurface gameSurface;
     
     public static void createWindow() {
         gameFrame = new JFrame("Tanks!");
         
-        GameSurface gameSurface = new GameSurface();
+        gameSurface = new GameSurface();
         
         gameFrame.add(gameSurface);
         gameFrame.addKeyListener(gameSurface);
+        gameFrame.addMouseListener(gameSurface);
         
         gameFrame.pack();
         gameFrame.setResizable(false);
