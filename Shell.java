@@ -12,19 +12,14 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import java.awt.geom.AffineTransform;
 
-public class Shell {
+public class Shell extends Sprite {
     private double speed;
-
-    private Point pos;
-    private double[] realCoords;
-    private double angle;
     
     private double xChange;
     private double yChange;
     
     private double diagAngle;
     private double diagLength;
-    private Dimension bBox;
     
     // Used to control how many times the shell can bounce off of walls before exploding
     private int safeBounces;
@@ -36,8 +31,9 @@ public class Shell {
     private int arrayListIndex;
     
     public Shell(double shellSpeed, double x, double y, double radians, int bounceNum) {
-        loadImages();
+        super(x, y, radians);
         
+        loadImages();
         // Pythagoras to calculate length of diagonal
         diagLength = Math.sqrt(Math.pow(shellImg.getHeight(), 2) + 
                                 Math.pow(shellImg.getWidth(), 2));
@@ -45,23 +41,14 @@ public class Shell {
         // tan = opp/adj so angle = atan(opp/adj)
         diagAngle = Math.atan((double) shellImg.getWidth()/shellImg.getHeight());
         
-        speed = shellSpeed;
-        pos = new Point((int) x, (int) y);
-        realCoords = new double[]{x, y};
+        calculateBoundingRect();
         
-        /* 
-         * Perform speed and bounding box calculations in constructor, to avoid 
-         * calculating the same thing every frame, wasting computing power.
-         */
-        angle = radians;
+        speed = shellSpeed;
         xChange = speed * Math.sin(angle);
         yChange = speed * Math.cos(angle);
         
         safeBounces = bounceNum;
         currentBounce = 0;
-        
-        bBox = new Dimension(0, 0);
-        calculateBoundingRect();
     }
     
     private void loadImages() {
@@ -71,23 +58,6 @@ public class Shell {
             JOptionPane.showMessageDialog(null, "Error loading shell sprite: " 
                                                   + e.getMessage());
         }
-    }
-    
-    private void calculateBoundingRect() {
-        // Calculate bounding box
-        double theta = Math.abs(angle);
-        if (theta > Math.PI / 2) {
-            // Keep theta between below 90 otherwise triangle angle calcs will break
-            theta = (Math.PI / 2) - (theta - (Math.PI / 2));
-        }
-           
-        // Trigonometry magic 
-        double tempAngle = Math.toRadians(90) - theta - diagAngle;
-        int bBoxHalfWidth = (int) ((diagLength / 2) * Math.cos(tempAngle));
-        int bBoxHalfHeight = (int) ((diagLength / 2) * Math.cos(theta - diagAngle));
-        
-        bBox.width = bBoxHalfWidth;
-        bBox.height = bBoxHalfHeight;
     }
     
     private void bounce(int surface) {

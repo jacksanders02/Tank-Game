@@ -16,7 +16,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import java.awt.geom.AffineTransform;
 
-class Player {
+class Player extends Sprite {
     // Constants and instance variables
     public final double SPEED = 200 * ((double)GameSurface.FRAME_TIME / 1000); // Px/frame
     public final double TURN_SPEED = Math.toRadians(144) * ((double)GameSurface.FRAME_TIME / 1000); // rad/frame
@@ -24,20 +24,18 @@ class Player {
     private BufferedImage tankBase;
     private BufferedImage tankTurret;
     
-    private Point pos;
     private Point aim;
-    private double[] realCoords;
-    private double angle;
     private double turretAngle;
     
     // Used for bounding box calculations
     private double diagLength;
     private double diagAngle; // Angle from diagonal to long side of sprite
-    private Dimension bBox;
     
     private boolean[] keysPressed;
     
     public Player(int x, int y) {
+        super(x, y, 0);
+        
         // Load tank base and turret
         loadImages();
         
@@ -48,17 +46,10 @@ class Player {
         // tan = opp/adj so angle = atan(opp/adj)
         diagAngle = Math.atan((double) tankBase.getWidth()/tankBase.getHeight());
         
-        /* Store coordinates in relevant instance variables. realCoords is used 
-         * to store the true non-integer values of the coordinates, so that the
-         * player can move at a shallow angle and not be forced into a straight line
-         */
-        pos = new Point(x, y);
-        aim = pos;
-        realCoords = new double[]{x, y};
-        angle = 0;
-        
-        bBox = new Dimension(0, 0);
         calculateBoundingRect();
+        
+        // Initialise aim as a default Point, which will be updated later
+        aim = new Point(0,0);
         
         /*
          * Stores data on which direction is being pressed, to remove the delay
@@ -133,23 +124,6 @@ class Player {
         
         // Adds a shell to GameSurface's arraylist
         Tanks.gameSurface.addShell(new Shell(SPEED * 2, shellX, shellY, turretAngle, 1));
-    }
-    
-    private void calculateBoundingRect() {
-        // Calculate bounding box
-        double theta = Math.abs(angle);
-        if (theta > Math.PI / 2) {
-            // Keep theta between below pi/2 otherwise triangle angle calcs will break
-            theta = Math.PI - theta;
-        }
-           
-        // Trigonometry magic 
-        double tempAngle = Math.PI / 2 - theta - diagAngle;
-        int bBoxHalfWidth = (int) ((diagLength / 2) * Math.cos(tempAngle));
-        int bBoxHalfHeight = (int) ((diagLength / 2) * Math.cos(theta - diagAngle));
-        
-        bBox.width = bBoxHalfWidth;
-        bBox.height = bBoxHalfHeight;
     }
     
     public void update() {
