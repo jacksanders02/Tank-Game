@@ -11,6 +11,8 @@ class Tanks {
     public static JFrame gameFrame;
     public static GameSurface gameSurface;
     
+    public static boolean debug;
+    
     public static void createWindow() {
         gameFrame = new JFrame("Tanks!");
         
@@ -49,6 +51,7 @@ class Tanks {
         // https://stackoverflow.com/a/22534931/4655368
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                debug = Boolean.parseBoolean(System.getProperty("debugMode"));
                 createWindow();
             }
         });

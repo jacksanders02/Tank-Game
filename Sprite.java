@@ -5,6 +5,10 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import javax.swing.JOptionPane;
 
+import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.Color;
+
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -26,9 +30,17 @@ public class Sprite {
     protected double diagAngle; // Angle from diagonal to long side of sprite
     protected Dimension bBox;
     
+    protected Rectangle baseRect;
+    protected Shape hitbox;
+    
+    // Stores index of shell in arraylist, for easy deletion
+    protected int arrayListIndex;
+    
     public Sprite(String[] imageArray, double x, double y, double radians) {
         imageList = new ArrayList<BufferedImage>();
         loadImages(imageArray);
+        
+        baseRect = new Rectangle(0, 0, imageList.get(0).getWidth(), imageList.get(0).getHeight());
         
         pos = new Point((int) x, (int) y);
         realCoords = new double[]{x, y};
@@ -49,6 +61,11 @@ public class Sprite {
         
         bBox = new Dimension(0, 0);
         calculateBoundingRect();
+        
+        // Create default hitbox
+        AffineTransform at = new AffineTransform();
+        at.setToIdentity();
+        hitbox = at.createTransformedShape(baseRect);
     }
     
     protected void calculateBoundingRect() {
@@ -82,6 +99,14 @@ public class Sprite {
         }
     }
     
+    public Shape getHitbox() {
+        return hitbox;
+    }
+    
+    public void setArrayListIndex(int i) {
+        arrayListIndex = i;
+    }
+    
     public void draw(Graphics g, ImageObserver observer) {
         // Create AffineTransform object that will rotate the image.
         AffineTransform at = new AffineTransform();
@@ -90,8 +115,16 @@ public class Sprite {
         at.rotate(angle); // Rotate
         // Translate up and left by half of width and height, to centre the image
         at.translate(-imageList.get(0).getWidth()/2, -imageList.get(0).getHeight()/2);
+        
+        hitbox = at.createTransformedShape(baseRect);
 
         Graphics2D g2d = (Graphics2D) g;
+        
         g2d.drawImage(imageList.get(0), at, null);
+        
+        if (Tanks.debug) {
+            g2d.setColor(Color.RED);
+            g2d.draw(hitbox);
+        }
     }
 }

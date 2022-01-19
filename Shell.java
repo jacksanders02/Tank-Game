@@ -10,9 +10,6 @@ public class Shell extends Sprite {
     private int safeBounces;
     private int currentBounce;
     
-    // Stores index of shell in arraylist, for easy deletion
-    private int arrayListIndex;
-    
     public Shell(int speedMult, double x, double y, double radians, int bounceNum) {
         super(new String[]{"shell.png"}, x, y, radians);
         
@@ -47,10 +44,6 @@ public class Shell extends Sprite {
     
     private void destroy() {
         Tanks.gameSurface.deleteShell(arrayListIndex);
-    }
-    
-    public void setArrayListIndex(int i) {
-        arrayListIndex = i;
     }
     
     public void update() {

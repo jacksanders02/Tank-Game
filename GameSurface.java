@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.awt.geom.Area;
 
 import javax.swing.*;
 
@@ -30,6 +31,7 @@ class GameSurface extends JPanel implements ActionListener, KeyListener, MouseLi
     private Timer gameTimer;
     
     private ArrayList<Shell> shellList;
+    private ArrayList<Tank> tankList;
     
     public GameSurface() {
         // Load asset for background image
@@ -40,7 +42,11 @@ class GameSurface extends JPanel implements ActionListener, KeyListener, MouseLi
         setBackground(new Color(255, 0, 0));
         
         player = new Player(GAME_WIDTH / 2, GAME_HEIGHT / 2);
+        player.setArrayListIndex(0);
+        
         shellList = new ArrayList<Shell>();
+        tankList = new ArrayList<Tank>();
+        tankList.add(player);
         
         // Set up and start game loop (timer calls actionPerformed every FRAME_TIME ms)
         gameTimer = new Timer(FRAME_TIME, this);
@@ -49,10 +55,25 @@ class GameSurface extends JPanel implements ActionListener, KeyListener, MouseLi
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        player.update();
+        for (int i=0; i<tankList.size(); i++) {
+            tankList.get(i).update();
+        }
         
         for (int i=0; i<shellList.size(); i++) {
             shellList.get(i).update();
+            
+            // Break loop if last shell was destroyed in update
+            if (i >= shellList.size()) break;
+            
+            Area currentShellHitbox = new Area(shellList.get(i).getHitbox());
+            
+            // Check if shell has hit a tank
+            for (int j=0; j<tankList.size(); j++) {
+                currentShellHitbox.intersect(new Area(tankList.get(j).getHitbox()));
+                if (!currentShellHitbox.isEmpty()) {
+                    System.out.println("ouch");
+                }
+            }
         }
         
         repaint(); // Method of JPanel - calls paintComponent again
@@ -64,7 +85,9 @@ class GameSurface extends JPanel implements ActionListener, KeyListener, MouseLi
 
         drawBackground(g); // Draw game background
         
-        player.draw(g, this); // Draw player sprite
+        for (int i=0; i<tankList.size(); i++) {
+            tankList.get(i).draw(g, this);
+        }
         
         for (int i=0; i<shellList.size(); i++) {
             shellList.get(i).draw(g, this);
@@ -122,6 +145,16 @@ class GameSurface extends JPanel implements ActionListener, KeyListener, MouseLi
             }
         }
         shellList.remove(index);
+    }
+    
+    public void deleteTank(int index) {
+        // Subtract 1 from the index of all subsequent shells
+        if (index != tankList.size() - 1) {
+            for (int i=index+1; i<tankList.size(); i++) {
+                tankList.get(i).setArrayListIndex(i - 1);
+            }
+        }
+        tankList.remove(index);
     }
     
     private void drawBackground(Graphics g) {

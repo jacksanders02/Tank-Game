@@ -6,8 +6,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.MouseInfo;
 
-import java.awt.geom.AffineTransform;
-
 class Player extends Tank {
     
     private boolean[] keysPressed;
