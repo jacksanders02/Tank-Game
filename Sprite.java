@@ -19,6 +19,8 @@ import java.awt.Dimension;
 import java.util.ArrayList;
 
 public class Sprite {
+    private final int ANIMATION_FRAMES = 250 / GameSurface.FRAME_TIME;
+    
     protected ArrayList<BufferedImage> imageList;
     
     protected Point pos;
@@ -33,8 +35,14 @@ public class Sprite {
     protected Rectangle baseRect;
     protected Shape hitbox;
     
-    // Stores index of shell in arraylist, for easy deletion
+    // Stores index of sprite in arraylist, for easy deletion
     protected int arrayListIndex;
+    
+    // Used for animation
+    protected BufferedImage[] animationFrames; // Stores sprite images
+    protected int currentFrame; // Stores current frame of animation
+    protected int animationCounter; // Number of frames since last frame change
+    protected int animationStep; // Number of frames to move forwards/back
     
     public Sprite(String[] imageArray, double x, double y, double radians) {
         imageList = new ArrayList<BufferedImage>();
@@ -66,6 +74,12 @@ public class Sprite {
         AffineTransform at = new AffineTransform();
         at.setToIdentity();
         hitbox = at.createTransformedShape(baseRect);
+        
+        animationFrames = new BufferedImage[4];
+        animationFrames[0] = imageList.get(0);
+        currentFrame = 0;
+        animationCounter = 0;
+        animationStep = 0;
     }
     
     protected void calculateBoundingRect() {
@@ -105,6 +119,22 @@ public class Sprite {
     
     public void setArrayListIndex(int i) {
         arrayListIndex = i;
+    }
+    
+    public void animate() {
+        if (animationStep != 0) {
+            animationCounter++;
+            if (animationCounter >= ANIMATION_FRAMES) {
+                animationCounter = 0;
+                currentFrame += animationStep;
+                if (currentFrame > animationFrames.length - 1) {
+                    currentFrame = 0;
+                } else if (currentFrame < 0) {
+                    currentFrame = animationFrames.length - 1;
+                }
+                imageList.set(0, animationFrames[currentFrame]);
+            }
+        }
     }
     
     public void draw(Graphics g, ImageObserver observer) {

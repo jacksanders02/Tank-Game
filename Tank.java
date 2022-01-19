@@ -21,19 +21,12 @@ class Tank extends Sprite {
     public final double BASE_SPEED = 200 * ((double)GameSurface.FRAME_TIME / 1000); // Px/frame
     public final double TURN_SPEED = Math.toRadians(144) * ((double)GameSurface.FRAME_TIME / 1000); // rad/frame
     
-    private final int ANIMATION_FRAMES = 250 / GameSurface.FRAME_TIME;
-    
     protected Point aim;
     protected double turretAngle;
     protected double speed;
     
     protected double xChange;
     protected double yChange;
-    
-    protected BufferedImage[] animationFrames;
-    protected int currentFrame;
-    protected int animationCounter;
-    protected int animationStep;
     
     private String tankType;
     
@@ -46,12 +39,7 @@ class Tank extends Sprite {
         
         speed = BASE_SPEED * speedMult;
         
-        animationFrames = new BufferedImage[4];
-        animationFrames[0] = imageList.get(0);
         loadAnimationFrames();
-        currentFrame = 0;
-        animationCounter = 0;
-        animationStep = 0;
     }
     
     protected void fireShell(int shellSpeedMult, int bounceNum) {
@@ -70,19 +58,7 @@ class Tank extends Sprite {
     }
     
     public void update() {
-        if (animationStep != 0) {
-            animationCounter++;
-            if (animationCounter >= ANIMATION_FRAMES) {
-                animationCounter = 0;
-                currentFrame += animationStep;
-                if (currentFrame > animationFrames.length - 1) {
-                    currentFrame = 0;
-                } else if (currentFrame < 0) {
-                    currentFrame = animationFrames.length - 1;
-                }
-                imageList.set(0, animationFrames[currentFrame]);
-            }
-        }
+        super.animate();
         
         if (angle < -Math.PI) {
             angle += Math.PI * 2;

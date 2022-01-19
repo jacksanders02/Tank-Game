@@ -45,6 +45,19 @@ class Player extends Tank {
                 if (k) animationStep = 1;
             }
         }
+        
+        /*
+         * Ensures keysPressed is NOT one of the following:
+         * {true, true, true, true}
+         * {true, true, false, false}
+         * {false, false, true, true}
+         * {false, false, false, false}
+         * As those would mean the tank is not moving, and so shouldn't be animated
+         */
+         
+        if (!((keysPressed[0] ^ keysPressed[1]) || (keysPressed[2] ^ keysPressed[3]))) {
+            animationStep = 0;
+        }
     }
     
     public void handleKeyRelease(KeyEvent e) {
@@ -71,6 +84,11 @@ class Player extends Tank {
             for (boolean k : keysPressed) {
                 if (k) animationStep = 1;
             }
+        }
+         
+        // See above
+        if (!((keysPressed[0] ^ keysPressed[1]) || (keysPressed[2] ^ keysPressed[3]))) {
+            animationStep = 0;
         }
     }
     
