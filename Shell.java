@@ -1,4 +1,6 @@
 public class Shell extends Sprite {
+    public final double BASE_SPEED = 400 * ((double)GameSurface.FRAME_TIME / 1000); // Px/frame
+    
     private double speed;
     
     private double xChange;
@@ -11,10 +13,10 @@ public class Shell extends Sprite {
     // Stores index of shell in arraylist, for easy deletion
     private int arrayListIndex;
     
-    public Shell(double shellSpeed, double x, double y, double radians, int bounceNum) {
+    public Shell(int speedMult, double x, double y, double radians, int bounceNum) {
         super(new String[]{"shell.png"}, x, y, radians);
         
-        speed = shellSpeed;
+        speed = BASE_SPEED * speedMult;
         xChange = speed * Math.sin(angle);
         yChange = speed * Math.cos(angle);
         
