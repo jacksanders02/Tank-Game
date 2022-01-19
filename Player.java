@@ -132,7 +132,7 @@ class Player {
         int shellY = (int) (pos.y - Math.cos(turretAngle) * turretLength);
         
         // Adds a shell to GameSurface's arraylist
-        Tanks.gameSurface.addShell(new Shell(SPEED * 2, shellX, shellY, turretAngle, 0));
+        Tanks.gameSurface.addShell(new Shell(SPEED * 2, shellX, shellY, turretAngle, 1));
     }
     
     private void calculateBoundingRect() {

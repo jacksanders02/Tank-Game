@@ -27,7 +27,7 @@ public class Shell {
     private Dimension bBox;
     
     // Used to control how many times the shell can bounce off of walls before exploding
-    private int bounceNum;
+    private int safeBounces;
     private int currentBounce;
     
     private BufferedImage shellImg;
@@ -35,7 +35,7 @@ public class Shell {
     // Stores index of shell in arraylist, for easy deletion
     private int arrayListIndex;
     
-    public Shell(double speed, double x, double y, double radians, int bounceNum) {
+    public Shell(double shellSpeed, double x, double y, double radians, int bounceNum) {
         loadImages();
         
         // Pythagoras to calculate length of diagonal
@@ -45,7 +45,7 @@ public class Shell {
         // tan = opp/adj so angle = atan(opp/adj)
         diagAngle = Math.atan((double) shellImg.getWidth()/shellImg.getHeight());
         
-        speed = speed;
+        speed = shellSpeed;
         pos = new Point((int) x, (int) y);
         realCoords = new double[]{x, y};
         
@@ -57,7 +57,7 @@ public class Shell {
         xChange = speed * Math.sin(angle);
         yChange = speed * Math.cos(angle);
         
-        bounceNum = bounceNum;
+        safeBounces = bounceNum;
         currentBounce = 0;
         
         bBox = new Dimension(0, 0);
@@ -90,6 +90,27 @@ public class Shell {
         bBox.height = bBoxHalfHeight;
     }
     
+    private void bounce(int surface) {
+        if (currentBounce >= safeBounces) {
+            destroy();
+        }
+        
+        // 0 - left or right wall; 1 - top or bottom wall.
+        switch (surface) {
+            case 0 -> angle *= -1;
+            case 1 -> angle = Math.PI - angle;
+            default -> System.out.println("Something broke :/");
+        }
+        
+        
+        xChange = speed * Math.sin(angle);
+        yChange = speed * Math.cos(angle);
+        
+        calculateBoundingRect();
+        
+        currentBounce ++;
+    }
+    
     private void destroy() {
         Tanks.gameSurface.deleteShell(arrayListIndex);
     }
@@ -105,23 +126,17 @@ public class Shell {
         pos.x = (int) realCoords[0];
         pos.y = (int) realCoords[1];
         
-        boolean collided = false;
-        
         // Check in both x and y dimensions to see if the bounding box intersects with the edge of the frame
-        if (realCoords[0] - bBox.width < 0 || 
+        if (realCoords[0] < bBox.width || 
                 realCoords[0] + bBox.width > GameSurface.GAME_WIDTH) {
-            System.out.println("Wall go brr");
-            collided = true;
+            // Hit the left or right walls
+            bounce(0);
         }
         
-        if (realCoords[1] - bBox.height < 0 || 
+        if (realCoords[1] < bBox.height || 
                 realCoords[1] + bBox.height > GameSurface.GAME_HEIGHT) {
-            System.out.println("Ceiling go brr");
-            collided = true;
-        }
-        
-        if (collided) {
-            Tanks.gameSurface.deleteShell(arrayListIndex);
+            // Hit the upper or lower walls
+            bounce(1);
         }
     }
     
