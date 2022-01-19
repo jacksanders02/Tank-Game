@@ -19,7 +19,7 @@ import java.awt.geom.AffineTransform;
 class Player {
     // Constants and instance variables
     public final double SPEED = 200 * ((double)GameSurface.FRAME_TIME / 1000); // Px/frame
-    public final double TURN_SPEED = 72 * ((double)GameSurface.FRAME_TIME / 1000); // Deg/frame
+    public final double TURN_SPEED = 144 * ((double)GameSurface.FRAME_TIME / 1000); // Deg/frame
     
     private BufferedImage tankBase;
     private BufferedImage tankTurret;
