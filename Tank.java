@@ -33,7 +33,7 @@ class Tank extends Sprite {
     
     protected void fireShell(int shellSpeedMult, int bounceNum) {
         // Calculate shell position to be at the end of the turret
-        double turretLength = imageList.get(1).getHeight() / 2;
+        double turretLength = (imageList.get(1).getHeight() / 2) + 10;
         int shellX = (int) (pos.x + Math.sin(turretAngle) * turretLength);
         int shellY = (int) (pos.y - Math.cos(turretAngle) * turretLength);
         
