@@ -1,19 +1,13 @@
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import javax.swing.JOptionPane;
 
 import java.awt.Point;
-import java.awt.Dimension;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.MouseInfo;
 
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 import java.awt.geom.AffineTransform;
 
 class Player extends Sprite {
@@ -21,32 +15,13 @@ class Player extends Sprite {
     public final double SPEED = 200 * ((double)GameSurface.FRAME_TIME / 1000); // Px/frame
     public final double TURN_SPEED = Math.toRadians(144) * ((double)GameSurface.FRAME_TIME / 1000); // rad/frame
     
-    private BufferedImage tankBase;
-    private BufferedImage tankTurret;
-    
     private Point aim;
     private double turretAngle;
-    
-    // Used for bounding box calculations
-    private double diagLength;
-    private double diagAngle; // Angle from diagonal to long side of sprite
     
     private boolean[] keysPressed;
     
     public Player(int x, int y) {
-        super(x, y, 0);
-        
-        // Load tank base and turret
-        loadImages();
-        
-        // Pythagoras to calculate length of diagonal
-        diagLength = Math.sqrt(Math.pow(tankBase.getHeight(), 2) + 
-                                Math.pow(tankBase.getWidth(), 2));
-
-        // tan = opp/adj so angle = atan(opp/adj)
-        diagAngle = Math.atan((double) tankBase.getWidth()/tankBase.getHeight());
-        
-        calculateBoundingRect();
+        super(new String[]{"tankBase.png", "tankTurret.png"}, x, y, 0);
         
         // Initialise aim as a default Point, which will be updated later
         aim = new Point(0,0);
@@ -56,16 +31,6 @@ class Player extends Sprite {
          * between initial keypress and the next. [UP, DOWN, LEFT, RIGHT]
          */
         keysPressed = new boolean[4];
-    }
-    
-    private void loadImages() {
-        try {
-            tankBase = ImageIO.read(new File("assets/images/tankBase.png"));
-            tankTurret = ImageIO.read(new File("assets/images/tankTurret.png"));
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error loading player sprites: " 
-                                                  + e.getMessage());
-        }
     }
     
     public void handleKeypress(KeyEvent e) {
@@ -118,7 +83,7 @@ class Player extends Sprite {
     
     private void fireShell() {
         // Calculate shell position to be at the end of the turret
-        double turretLength = tankTurret.getHeight() / 2;
+        double turretLength = imageList.get(1).getHeight() / 2;
         int shellX = (int) (pos.x + Math.sin(turretAngle) * turretLength);
         int shellY = (int) (pos.y - Math.cos(turretAngle) * turretLength);
         
@@ -184,22 +149,17 @@ class Player extends Sprite {
         }
     }
     
+    @Override
     public void draw(Graphics g, ImageObserver observer) {
+        super.draw(g, observer);
         // Create AffineTransform object that will rotate the image.
         AffineTransform at = new AffineTransform();
         at.translate(pos.x, pos.y); // Translate to desired position
-        at.rotate(angle); // Rotate
-        // Translate up and left by half of width and height, to centre the image
-        at.translate(-tankBase.getWidth()/2, -tankBase.getHeight()/2);
-
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.drawImage(tankBase, at, null);
-        
-        at.setToIdentity();
-        at.translate(pos.x, pos.y); // Translate to desired position
         at.rotate(turretAngle); // Rotate (No need to convert to radians as turretAngle is already in radians)
         // Translate up and left by half of width and height, to centre the image
-        at.translate(-tankTurret.getWidth()/2, -tankTurret.getHeight()/2);
-        g2d.drawImage(tankTurret, at, null);
+        at.translate(-imageList.get(1).getWidth()/2, -imageList.get(1).getHeight()/2);
+        
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.drawImage(imageList.get(1), at, null);
     }
 }
