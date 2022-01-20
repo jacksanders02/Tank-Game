@@ -67,6 +67,22 @@ class GameSurface extends JPanel implements ActionListener, KeyListener, MouseLi
             
             Area currentShellHitbox = new Area(shellList.get(i).getHitbox());
             
+            boolean destroyed = false;
+            // Check if shell has hit another shell
+            for (int j=0; j<shellList.size(); j++) {
+                currentShellHitbox.intersect(new Area(shellList.get(j).getHitbox()));
+                if (!currentShellHitbox.isEmpty() && i != j) {
+                    shellList.get(i).destroy();
+                    if (j > i) j-= 1; // Subtract one from j to adjust for removed shell
+                    shellList.get(j).destroy();
+                    destroyed = true;
+                }
+            }
+            if (destroyed) continue;
+            
+            // Regen currentShellHitbox as intersect (previous loop) mutates it
+            currentShellHitbox = new Area(shellList.get(i).getHitbox());
+            
             // Check if shell has hit a tank
             for (int j=0; j<tankList.size(); j++) {
                 currentShellHitbox.intersect(new Area(tankList.get(j).getHitbox()));
