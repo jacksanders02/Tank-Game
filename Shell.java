@@ -10,7 +10,10 @@ public class Shell extends Sprite {
     private int safeBounces;
     private int currentBounce;
     
-    public Shell(int speedMult, double x, double y, double radians, int bounceNum) {
+    private Tank firedBy;
+    
+    public Shell(int speedMult, double x, double y, double radians, int bounceNum,
+                 Tank tank) {
         super(new String[]{"shell.png"}, x, y, radians);
         
         speed = BASE_SPEED * speedMult;
@@ -19,6 +22,8 @@ public class Shell extends Sprite {
         
         safeBounces = bounceNum;
         currentBounce = 0;
+        
+        firedBy = tank; // So that tanks can keep track of how many shells they've fired
     }
     
     private void bounce(int surface) {
@@ -44,6 +49,7 @@ public class Shell extends Sprite {
     
     public void destroy() {
         Tanks.gameSurface.deleteShell(arrayListIndex);
+        firedBy.shellDestroyed();
     }
     
     public void update() {

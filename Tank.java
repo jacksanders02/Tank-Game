@@ -30,6 +30,18 @@ class Tank extends Sprite {
     
     private String tankType;
     
+    private BufferedImage[] turretAnimFrames; // Stores sprite images
+    private boolean animateTurret;
+    private int turretFrame;
+    private int turretAnimCounter;
+    private boolean hasFired; // Tank has requested to fire
+    
+    private int queuedShells; // Stores data for shell to be fired
+    private int numShells; // Number of shells fired that haven't exploded
+    
+    protected int shellSpeedMult;
+    protected int shellBounceNum;
+    
     public Tank(String type, int x, int y, double radians, int speedMult) {
         super(new String[]{type+"TankBase.png", type+"TankTurret.png"}, x, y, radians);
         tankType = type;
@@ -39,10 +51,23 @@ class Tank extends Sprite {
         
         speed = BASE_SPEED * speedMult;
         
+        turretAnimFrames = new BufferedImage[4];
+        turretAnimFrames[0] = imageList.get(1);
+        
         loadAnimationFrames();
+        
+        hasFired = false;
+        animateTurret = false;
+        turretFrame = 0;
+        turretAnimCounter = 0;
+        
+        queuedShells = 0;
+        numShells = 0;
     }
     
-    protected void fireShell(int shellSpeedMult, int bounceNum) {
+    private void fireShell() {
+        queuedShells -= 1;
+        numShells ++;
         // Calculate shell position to be at the end of the turret
         double turretLength = (imageList.get(1).getHeight() / 2) + 10;
         int shellX = (int) (pos.x + Math.sin(turretAngle) * turretLength);
@@ -50,7 +75,21 @@ class Tank extends Sprite {
         
         // Adds a shell to GameSurface's arraylist
         Tanks.gameSurface.addShell(new Shell(shellSpeedMult, shellX, shellY, 
-                                             turretAngle, bounceNum));
+                                             turretAngle, shellBounceNum, this));
+                                             
+                                             
+    }
+    
+    protected void queueShell() {
+        if (numShells + queuedShells < 5) {
+            queuedShells++;
+            hasFired = true;
+            animateTurret = true;
+        }
+    }
+    
+    public void shellDestroyed() {
+        numShells -= 1;
     }
     
     public void kill() {
@@ -59,6 +98,22 @@ class Tank extends Sprite {
     
     public void update() {
         super.animate();
+        
+        // Animation for turret
+        if (animateTurret) {
+            turretAnimCounter++;
+            if (turretAnimCounter >= ANIMATION_FRAMES / 5) {
+                turretAnimCounter = 0;
+                turretFrame ++;
+                if (turretFrame == 2) {
+                    fireShell();
+                } else if (turretFrame > turretAnimFrames.length - 1) {
+                    turretFrame = 0;
+                    if (queuedShells == 0) animateTurret = false;
+                }
+                imageList.set(1, turretAnimFrames[turretFrame]);
+            }
+        }
         
         if (angle < -Math.PI) {
             angle += Math.PI * 2;
@@ -105,6 +160,7 @@ class Tank extends Sprite {
     }
     
     private void loadAnimationFrames() {
+        // Turret animation and tank animation have the same number of frames, so no need for second loop
         for (int i=1; i<animationFrames.length; i++) {
             try {
                 animationFrames[i] = ImageIO.read(new File("assets/images/" + 
@@ -112,8 +168,18 @@ class Tank extends Sprite {
                                                             "TankBase" + i + 
                                                             ".png"));
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, "Error loading sprites: " +
-                                                      e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error loading tank base " +
+                                                     "sprites: " + e.getMessage());
+            }
+            
+            try {
+                turretAnimFrames[i] = ImageIO.read(new File("assets/images/" + 
+                                                            tankType + 
+                                                            "TankTurret" + i + 
+                                                            ".png"));
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Error loading tank turret " +
+                                                     "sprites: " + e.getMessage());
             }
         }
     }

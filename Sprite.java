@@ -19,7 +19,7 @@ import java.awt.Dimension;
 import java.util.ArrayList;
 
 public class Sprite {
-    private final int ANIMATION_FRAMES = 250 / GameSurface.FRAME_TIME;
+    protected final int ANIMATION_FRAMES = 250 / GameSurface.FRAME_TIME;
     
     protected ArrayList<BufferedImage> imageList;
     

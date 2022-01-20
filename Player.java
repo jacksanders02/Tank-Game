@@ -20,6 +20,9 @@ class Player extends Tank {
          * between initial keypress and the next. [UP, DOWN, LEFT, RIGHT]
          */
         keysPressed = new boolean[4];
+        
+        shellSpeedMult = 1;
+        shellBounceNum = 1;
     }
     
     public void handleKeypress(KeyEvent e) {
@@ -97,7 +100,7 @@ class Player extends Tank {
         
         // LMB to shoot
         if (button == MouseEvent.BUTTON1) {
-            fireShell(1, 1);
+            queueShell();
         }
         
         // RMB to lay a mine
