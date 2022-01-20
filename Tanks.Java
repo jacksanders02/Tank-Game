@@ -35,6 +35,9 @@ class Tanks {
         gameFrame.getContentPane().setCursor(crosshairCursor);
         
         gameFrame.setVisible(true);
+        
+        // Load the frames used for smoke animation
+        Shell.loadSmokeFrames();
     }
     
     private static BufferedImage loadCrosshair() {

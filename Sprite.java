@@ -121,10 +121,10 @@ public class Sprite {
         arrayListIndex = i;
     }
     
-    public void animate() {
+    public void animate(int speedMult, int animImage) {
         if (animationStep != 0) {
             animationCounter++;
-            if (animationCounter >= ANIMATION_FRAMES) {
+            if (animationCounter >= ANIMATION_FRAMES / speedMult) {
                 animationCounter = 0;
                 currentFrame += animationStep;
                 if (currentFrame > animationFrames.length - 1) {
@@ -132,7 +132,7 @@ public class Sprite {
                 } else if (currentFrame < 0) {
                     currentFrame = animationFrames.length - 1;
                 }
-                imageList.set(0, animationFrames[currentFrame]);
+                imageList.set(animImage, animationFrames[currentFrame]);
             }
         }
     }

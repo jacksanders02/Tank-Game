@@ -97,7 +97,7 @@ class Tank extends Sprite {
     }
     
     public void update() {
-        super.animate();
+       super.animate(1, 0);
         
         // Animation for turret
         if (animateTurret) {
